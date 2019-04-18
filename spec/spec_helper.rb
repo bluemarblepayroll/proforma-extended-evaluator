@@ -8,9 +8,7 @@
 #
 
 require 'yaml'
-
 require 'pry'
-require 'pdf/inspector'
 
 require 'simplecov'
 require 'simplecov-console'
