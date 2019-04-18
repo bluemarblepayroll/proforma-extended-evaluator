@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    proforma-extended-evaluator (0.0.1)
+    proforma-extended-evaluator (1.0.0)
       stringento (~> 2)
 
 GEM
