@@ -1,15 +1,7 @@
-GIT
-  remote: https://github.com/bluemarblepayroll/proforma.git
-  revision: 1b94e7c14d420be7e45245c8b47151169120ad5d
-  branch: genesis
-  specs:
-    proforma (1.0.0)
-      acts_as_hashable (~> 1)
-
 PATH
   remote: .
   specs:
-    proforma-extended-evaluator (1.0.0)
+    proforma-extended-evaluator (1.0.0.pre.alpha)
       stringento (~> 2)
 
 GEM
@@ -54,6 +46,8 @@ GEM
     parser (2.6.0.0)
       ast (~> 2.4.0)
     powerpack (0.1.2)
+    proforma (1.0.0.pre.alpha)
+      acts_as_hashable (~> 1)
     pry (0.12.2)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
@@ -103,7 +97,7 @@ PLATFORMS
 
 DEPENDENCIES
   guard-rspec (~> 4.7)
-  proforma (= 1.0.0)!
+  proforma (>= 1.0.0.pre.alpha)
   proforma-extended-evaluator!
   pry (~> 0)
   rspec (~> 3.8)
