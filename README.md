@@ -5,13 +5,16 @@
 The core Proforma library intentionally ships with a very weak evaluator.  Custom text templating and value resolution is not part of the core library's domain.  This library fills that void.  The goals of this library are to provide:
 
 1. Nested value resolution using dot-notation: `demographics.contact.first_name`
-2. Indifferent object types for value resolution: Hash, OpenStruct, Object subclass, etc.
+2. Indifferent object types for value resolution: Hash, OpenStruct, any Object subclass, etc.
 3. Rich text templating: `{demo.last}, {demo.first} {demo.middle}`
 4. Customizable formatting:
   * `{amount::currency}` -> `$12,345.67 USD`
   * `{dob::date}` -> `2/4/1976`
   * `{user_count::number::0}` -> `12,400,569`
   * `{logins_per_day::number::2}` -> `76,004.45`
+  * `{smoker::boolean}` -> `Yes` or `No`
+  * `{smoker::boolean::nullable}` -> `Yes` or `No` or `Unknown`
+  * `{social_security_number::left_mask}` -> `XXXXXXX1234`
 
 ## Installation
 
@@ -29,7 +32,100 @@ bundle add proforma-extended-evaluator
 
 ## Examples
 
-TODO
+### Connecting to Proforma Rendering Pipeline
+
+To use this plugin within Proforma:
+
+1. Install Proforma
+2. Install this library
+3. Require both libraries
+4. Pass in an instance of Proforma::ExtendedEvaluator into the Proforma#render method
+
+````ruby
+require 'proforma'
+require 'proforma/extended_evaluator'
+
+data = [
+  {
+    id: 1,
+    person: {
+      first: 'James',
+      last: 'Bond',
+      dob: '1960-05-14',
+      smoker: false,
+      ssn: '123-45-6789'
+    },
+    balance: '123.445388'
+  }
+]
+
+template = {
+  children: [
+    {
+      type: 'Grouping',
+      children: [
+        {
+          type: 'Header',
+          value: 'Details For: {person.last}, {person.first} ({id})'
+        },
+        {
+          type: 'Pane',
+          columns: [
+            {
+              lines: [
+                { label: 'ID #', value: '{id::number::0}' },
+                { label: 'First Name', value: '{person.first}' },
+                { label: 'Last Name', value: '{person.last}' },
+                { label: 'Social Security #', value: '{person.ssn::left_mask}' }
+              ]
+            },
+            {
+              lines: [
+                { label: 'Birthdate', value: '{person.dob::date}' },
+                { label: 'Smoker', value: '{person.smoker::boolean}' },
+                { label: 'Balance', value: '{balance::currency}' }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+documents = Proforma.render(data, template, evaluator: Proforma::ExtendedEvaluator.new)
+````
+
+The `documents` attribute will now be an array with one object:
+
+```ruby
+expected_documents = [
+  {
+    contents: "DETAILS FOR: BOND, JAMES (1)\nID #: 1\nFirst Name: James\nLast Name:"\
+              " Bond\nSocial Security #: XXXXXXX6789\nBirthdate: 05/14/1960\nSmoker:"\
+              " No\nBalance: $123.45 USD\n",
+    extension: '.txt',
+    title: ''
+  }
+]
+```
+
+Notice how all strings are properly formatted as prescribed in the template.
+
+### Advanced Formatting (Customization/Options)
+
+Formatter options are biased towards USA localization.  You can override any of the options of the Formatter class, here are the options and their defaults:
+
+Option           | Default
+---------------- | -------
+currency_code    | 'USD'
+currency_round   | 2
+currency_symbol  | '$'
+date_format      | '%m/%d/%Y'
+mask_char        | 'X'
+false_value      | 'No'
+null_value       | 'Unknown'
+true_value       | 'Yes'
 
 ## Contributing
 

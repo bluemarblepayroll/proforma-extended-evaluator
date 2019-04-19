@@ -115,4 +115,43 @@ describe Proforma::ExtendedEvaluator::Formatter do
       expect(subject.number_formatter('12345.67899', arg)).to eq('12,345.679')
     end
   end
+
+  describe '#boolean_formatter' do
+    context 'non-nullable' do
+      let(:arg) { '' }
+
+      it 'should format truthy' do
+        expect(subject.boolean_formatter(true,    arg)).to eq('Yes')
+        expect(subject.boolean_formatter('true',  arg)).to eq('Yes')
+        expect(subject.boolean_formatter('True',  arg)).to eq('Yes')
+        expect(subject.boolean_formatter('t',     arg)).to eq('Yes')
+        expect(subject.boolean_formatter('1',     arg)).to eq('Yes')
+        expect(subject.boolean_formatter(1,       arg)).to eq('Yes')
+      end
+
+      it 'should format falsy' do
+        expect(subject.boolean_formatter(false,   arg)).to eq('No')
+        expect(subject.boolean_formatter('false', arg)).to eq('No')
+        expect(subject.boolean_formatter('False', arg)).to eq('No')
+        expect(subject.boolean_formatter(0,       arg)).to eq('No')
+        expect(subject.boolean_formatter('f',     arg)).to eq('No')
+      end
+
+      it 'should format nully' do
+        expect(subject.boolean_formatter(nil,     arg)).to eq('No')
+        expect(subject.boolean_formatter('nil',   arg)).to eq('No')
+        expect(subject.boolean_formatter('null',  arg)).to eq('No')
+      end
+    end
+
+    context 'nullable' do
+      let(:arg) { 'nullable' }
+
+      it 'should format nully' do
+        expect(subject.boolean_formatter(nil,     arg)).to eq('Unknown')
+        expect(subject.boolean_formatter('nil',   arg)).to eq('Unknown')
+        expect(subject.boolean_formatter('null',  arg)).to eq('Unknown')
+      end
+    end
+  end
 end

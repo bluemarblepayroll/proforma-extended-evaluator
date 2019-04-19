@@ -63,4 +63,68 @@ describe Proforma::ExtendedEvaluator do
 
     expect(actual_text).to eq('1')
   end
+
+  specify 'Proforma Rendering Example' do
+    data = [
+      {
+        id: 1,
+        person: {
+          first: 'James',
+          last: 'Bond',
+          dob: '1960-05-14',
+          smoker: false,
+          ssn: '123-45-6789'
+        },
+        balance: '123.445388'
+      }
+    ]
+
+    template = {
+      children: [
+        {
+          type: 'Grouping',
+          children: [
+            {
+              type: 'Header',
+              value: 'Details For: {person.last}, {person.first} ({id})'
+            },
+            {
+              type: 'Pane',
+              columns: [
+                {
+                  lines: [
+                    { label: 'ID #', value: '{id::number::0}' },
+                    { label: 'First Name', value: '{person.first}' },
+                    { label: 'Last Name', value: '{person.last}' },
+                    { label: 'Social Security #', value: '{person.ssn::left_mask}' }
+                  ]
+                },
+                {
+                  lines: [
+                    { label: 'Birthdate', value: '{person.dob::date}' },
+                    { label: 'Smoker', value: '{person.smoker::boolean}' },
+                    { label: 'Balance', value: '{balance::currency}' }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+
+    actual_documents = Proforma.render(data, template, evaluator: Proforma::ExtendedEvaluator.new)
+
+    expected_documents = [
+      Proforma::Document.new(
+        contents: "DETAILS FOR: BOND, JAMES (1)\nID #: 1\nFirst Name: James\nLast Name:"\
+                  " Bond\nSocial Security #: XXXXXXX6789\nBirthdate: 05/14/1960\nSmoker:"\
+                  " No\nBalance: $123.45 USD\n",
+        extension: '.txt',
+        title: ''
+      )
+    ]
+
+    expect(actual_documents).to eq(expected_documents)
+  end
 end

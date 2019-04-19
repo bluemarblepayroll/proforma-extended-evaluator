@@ -9,6 +9,7 @@
 
 require 'yaml'
 require 'pry'
+require 'proforma'
 
 require 'simplecov'
 require 'simplecov-console'
