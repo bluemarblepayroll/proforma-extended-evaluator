@@ -35,7 +35,7 @@ module Proforma
         if object.is_a?(Hash)
           indifferent_hash_get(object, key)
         elsif object.respond_to?(key)
-          object.send(key)
+          object.public_send(key)
         end
       end
 

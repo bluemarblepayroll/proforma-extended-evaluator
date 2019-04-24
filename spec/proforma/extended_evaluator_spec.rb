@@ -115,11 +115,20 @@ describe Proforma::ExtendedEvaluator do
 
     actual_documents = Proforma.render(data, template, evaluator: Proforma::ExtendedEvaluator.new)
 
+    expected_contents = <<~CONTENTS
+      DETAILS FOR: BOND, JAMES (1)
+      ID #: 1
+      First Name: James
+      Last Name: Bond
+      Social Security #: XXXXXXX6789
+      Birthdate: 05/14/1960
+      Smoker: No
+      Balance: $123.45 USD
+    CONTENTS
+
     expected_documents = [
       Proforma::Document.new(
-        contents: "DETAILS FOR: BOND, JAMES (1)\nID #: 1\nFirst Name: James\nLast Name:"\
-                  " Bond\nSocial Security #: XXXXXXX6789\nBirthdate: 05/14/1960\nSmoker:"\
-                  " No\nBalance: $123.45 USD\n",
+        contents: expected_contents,
         extension: '.txt',
         title: ''
       )
