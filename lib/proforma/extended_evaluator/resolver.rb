@@ -11,13 +11,25 @@ module Proforma
   class ExtendedEvaluator
     # This class is also meant to be plugged into Stringento to provide value resolution.
     class Resolver
-      DOT_NOTATION_SEPARATOR = '.'
+      DEFAULT_SEPARATOR = '.'
+
+      attr_reader :separator
+
+      def initialize(separator: DEFAULT_SEPARATOR)
+        @separator = separator.to_s
+      end
 
       def resolve(value, input)
-        traverse(input, value.to_s.split(DOT_NOTATION_SEPARATOR))
+        traverse(input, key_path(value))
       end
 
       private
+
+      def key_path(value)
+        return Array(value.to_s) if separator.empty?
+
+        value.to_s.split(separator)
+      end
 
       def traverse(object, through)
         pointer = object
