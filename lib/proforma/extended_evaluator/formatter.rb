@@ -21,18 +21,16 @@ module Proforma
         currency_symbol: '$',
         date_format: '%m/%d/%Y',
         decimal_separator: '.',
+        iso_date_format: '%Y-%m-%d',
         mask_char: 'X',
         false_value: 'No',
         null_value: 'Unknown',
+        nullish_regex: /^(nil|null)$/i.freeze,
+        thousands_regex: /[0-9](?=(?:[0-9]{3})+(?![0-9]))/.freeze,
         thousands_separator: ',',
-        true_value: 'Yes'
+        true_value: 'Yes',
+        truthy_regex: /^(true|t|yes|y|1)$/i.freeze
       }.freeze
-
-      ISO_DATE_FORMAT           = '%Y-%m-%d'
-      NULLISH                   = /^(nil|null)$/i.freeze
-      THOUSANDS_WITH_DECIMAL    = /(\d)(?=\d{3}+\.)/.freeze
-      THOUSANDS_WITHOUT_DECIMAL = /(\d)(?=\d{3}+$)/.freeze
-      TRUTHY                    = /^(true|t|yes|y|1)$/i.freeze
 
       attr_reader :options
 
@@ -42,10 +40,14 @@ module Proforma
                       :currency_symbol,
                       :date_format,
                       :decimal_separator,
+                      :iso_date_format,
                       :false_value,
                       :mask_char,
                       :null_value,
+                      :nullish_regex,
+                      :thousands_regex,
                       :thousands_separator,
+                      :truthy_regex,
                       :true_value
 
       def initialize(opts = {})
@@ -68,7 +70,7 @@ module Proforma
       def date_formatter(value, _arg)
         return '' if null_or_empty?(value)
 
-        date = Date.strptime(value.to_s, ISO_DATE_FORMAT)
+        date = Date.strptime(value.to_s, iso_date_format)
 
         date.strftime(date_format)
       end
@@ -87,10 +89,9 @@ module Proforma
       def number_formatter(value, decimal_places)
         decimal_places = decimal_places.to_s.empty? ? 6 : decimal_places.to_s.to_i
 
-        regex = decimal_places.positive? ? THOUSANDS_WITH_DECIMAL : THOUSANDS_WITHOUT_DECIMAL
-
-        format("%0.#{decimal_places}f", value || 0).gsub(regex, "\\1#{thousands_separator}")
-                                                   .gsub('.', decimal_separator)
+        format("%0.#{decimal_places}f", value || 0)
+          .gsub(thousands_regex, "\\0#{thousands_separator}")
+          .gsub('.', decimal_separator)
       end
 
       def boolean_formatter(value, nullable)
@@ -120,11 +121,11 @@ module Proforma
 
       # rubocop:disable Style/DoubleNegation
       def nully?(val)
-        null_or_empty?(val) || !!(val.to_s =~ NULLISH)
+        null_or_empty?(val) || !!(val.to_s =~ nullish_regex)
       end
 
       def truthy?(val)
-        !!(val.to_s =~ TRUTHY)
+        !!(val.to_s =~ truthy_regex)
       end
       # rubocop:enable Style/DoubleNegation
     end

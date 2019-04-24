@@ -92,6 +92,7 @@ describe Proforma::ExtendedEvaluator::Formatter do
 
       specify 'returns formatted number' do
         expect(subject.number_formatter('12345.67899', arg)).to eq('12,345.679')
+        expect(subject.number_formatter('12345', arg)).to eq('12,345.000')
       end
     end
 
@@ -102,6 +103,7 @@ describe Proforma::ExtendedEvaluator::Formatter do
 
       specify 'returns formatted number' do
         expect(subject.number_formatter('12345.67899', arg)).to eq('12 345,679')
+        expect(subject.number_formatter('12345', arg)).to eq('12 345,000')
       end
     end
   end
