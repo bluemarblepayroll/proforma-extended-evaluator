@@ -25,11 +25,11 @@ module Proforma
         mask_char: 'X',
         false_value: 'No',
         null_value: 'Unknown',
-        nullish_regex: /^(nil|null)$/i.freeze,
+        nullish_regex: /\A(nil|null)\z/i.freeze,
         thousands_regex: /[0-9](?=(?:[0-9]{3})+(?![0-9]))/.freeze,
         thousands_separator: ',',
         true_value: 'Yes',
-        truthy_regex: /^(true|t|yes|y|1)$/i.freeze
+        truthy_regex: /\A(true|t|yes|y|1)\z/i.freeze
       }.freeze
 
       attr_reader :options
