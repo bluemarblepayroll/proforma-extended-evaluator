@@ -29,10 +29,10 @@ module Proforma
       }.freeze
 
       ISO_DATE_FORMAT           = '%Y-%m-%d'
-      NULLISH                   = /(nil|null)$/i.freeze
+      NULLISH                   = /^(nil|null)$/i.freeze
       THOUSANDS_WITH_DECIMAL    = /(\d)(?=\d{3}+\.)/.freeze
       THOUSANDS_WITHOUT_DECIMAL = /(\d)(?=\d{3}+$)/.freeze
-      TRUTHY                    = /(true|t|yes|y|1)$/i.freeze
+      TRUTHY                    = /^(true|t|yes|y|1)$/i.freeze
 
       attr_reader :options
 
@@ -52,8 +52,10 @@ module Proforma
         @options = OpenStruct.new(DEFAULTS.merge(opts))
       end
 
-      def left_mask_formatter(value, arg)
-        keep_last = arg.to_s.empty? ? 4 : arg.to_s.to_i
+      def left_mask_formatter(value, keep_last)
+        keep_last = keep_last.to_s.empty? ? 4 : keep_last.to_s.to_i
+
+        raise ArgumentError, "keep_last cannot be negative (#{keep_last})" if keep_last.negative?
 
         string_value = value.to_s
 
@@ -82,8 +84,8 @@ module Proforma
         "#{prefix}#{formatted_value}#{suffix}"
       end
 
-      def number_formatter(value, arg)
-        decimal_places = arg.to_s.empty? ? 6 : arg.to_s.to_i
+      def number_formatter(value, decimal_places)
+        decimal_places = decimal_places.to_s.empty? ? 6 : decimal_places.to_s.to_i
 
         regex = decimal_places.positive? ? THOUSANDS_WITH_DECIMAL : THOUSANDS_WITHOUT_DECIMAL
 
@@ -91,8 +93,8 @@ module Proforma
                                                    .gsub('.', decimal_separator)
       end
 
-      def boolean_formatter(value, arg)
-        nullable = arg.to_s == 'nullable'
+      def boolean_formatter(value, nullable)
+        nullable = nullable.to_s == 'nullable'
 
         if nullable && nully?(value)
           null_value

@@ -55,6 +55,10 @@ describe Proforma::ExtendedEvaluator::Formatter do
         expect(subject.left_mask_formatter('abcde',   arg)).to eq('XXXde')
         expect(subject.left_mask_formatter('abcdef',  arg)).to eq('XXXXef')
       end
+
+      specify 'raises ArgumentError for negative arg' do
+        expect { subject.left_mask_formatter(nil, -1) }.to raise_error(ArgumentError)
+      end
     end
   end
 
