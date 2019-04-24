@@ -13,14 +13,18 @@ module Proforma
     # plugged into Stringento to provide formatting for data types, such as: strings, dates,
     # currency, numbers, etc.
     class Formatter < Stringento::Formatter
+      extend Forwardable
+
       DEFAULTS = {
         currency_code: 'USD',
         currency_round: 2,
         currency_symbol: '$',
         date_format: '%m/%d/%Y',
+        decimal_separator: '.',
         mask_char: 'X',
         false_value: 'No',
         null_value: 'Unknown',
+        thousands_separator: ',',
         true_value: 'Yes'
       }.freeze
 
@@ -30,26 +34,22 @@ module Proforma
       THOUSANDS_WITHOUT_DECIMAL = /(\d)(?=\d{3}+$)/.freeze
       TRUTHY                    = /(true|t|yes|y|1)$/i.freeze
 
-      attr_reader :currency_code,
-                  :currency_round,
-                  :currency_symbol,
-                  :date_format,
-                  :false_value,
-                  :mask_char,
-                  :null_value,
-                  :true_value
+      attr_reader :options
+
+      def_delegators  :options,
+                      :currency_code,
+                      :currency_round,
+                      :currency_symbol,
+                      :date_format,
+                      :decimal_separator,
+                      :false_value,
+                      :mask_char,
+                      :null_value,
+                      :thousands_separator,
+                      :true_value
 
       def initialize(opts = {})
-        opts = DEFAULTS.merge(opts)
-
-        @currency_code   = opts[:currency_code]
-        @currency_round  = opts[:currency_round]
-        @currency_symbol = opts[:currency_symbol]
-        @date_format     = opts[:date_format]
-        @false_value     = opts[:false_value]
-        @mask_char       = opts[:mask_char]
-        @null_value      = opts[:null_value]
-        @true_value      = opts[:true_value]
+        @options = OpenStruct.new(DEFAULTS.merge(opts))
       end
 
       def left_mask_formatter(value, arg)
@@ -87,7 +87,8 @@ module Proforma
 
         regex = decimal_places.positive? ? THOUSANDS_WITH_DECIMAL : THOUSANDS_WITHOUT_DECIMAL
 
-        format("%0.#{decimal_places}f", value || 0).gsub(regex, '\1,')
+        format("%0.#{decimal_places}f", value || 0).gsub(regex, "\\1#{thousands_separator}")
+                                                   .gsub('.', decimal_separator)
       end
 
       def boolean_formatter(value, arg)

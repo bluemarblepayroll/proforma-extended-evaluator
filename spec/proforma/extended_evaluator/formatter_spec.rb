@@ -10,6 +10,18 @@
 require 'spec_helper'
 
 describe Proforma::ExtendedEvaluator::Formatter do
+  let(:usa_formatter) { described_class.new }
+
+  let(:france_formatter) do
+    described_class.new(
+      currency_code: '€',
+      currency_round: 2,
+      currency_symbol: '',
+      decimal_separator: ',',
+      thousands_separator: ' '
+    )
+  end
+
   describe '#left_mask_formatter' do
     specify 'returns empty string if value is null' do
       expect(subject.left_mask_formatter(nil, '')).to eq('')
@@ -68,51 +80,61 @@ describe Proforma::ExtendedEvaluator::Formatter do
     end
   end
 
-  describe '#currency_formatter' do
-    subject do
-      described_class.new(
-        currency_code: 'USD',
-        currency_round: 2,
-        currency_symbol: '$'
-      )
+  describe '#number_formatter' do
+    context 'localized for USA (default)' do
+      subject { usa_formatter }
+
+      let(:arg) { '3' }
+
+      specify 'returns formatted number' do
+        expect(subject.number_formatter('12345.67899', arg)).to eq('12,345.679')
+      end
     end
 
-    let(:arg) { '' }
+    context 'localized for France' do
+      subject { france_formatter }
 
-    specify 'returns empty string if value is null' do
-      expect(subject.currency_formatter(nil, '')).to eq('')
-    end
+      let(:arg) { '3' }
 
-    specify 'returns empty string if value is empty string' do
-      expect(subject.currency_formatter('', '')).to eq('')
-    end
-
-    specify 'returns formatted currency' do
-      expect(subject.currency_formatter('12345.67', arg)).to eq('$12,345.67 USD')
+      specify 'returns formatted number' do
+        expect(subject.number_formatter('12345.67899', arg)).to eq('12 345,679')
+      end
     end
   end
 
-  describe '#number_formatter' do
-    subject do
-      described_class.new(
-        currency_code: 'USD',
-        currency_round: 2,
-        currency_symbol: '$'
-      )
+  describe '#currency_formatter' do
+    let(:arg) { '' }
+
+    context 'localized for USA (default)' do
+      subject { usa_formatter }
+
+      specify 'returns empty string if value is null' do
+        expect(subject.currency_formatter(nil, arg)).to eq('')
+      end
+
+      specify 'returns empty string if value is empty string' do
+        expect(subject.currency_formatter('', arg)).to eq('')
+      end
+
+      specify 'returns formatted currency' do
+        expect(subject.currency_formatter('12345.67', arg)).to eq('$12,345.67 USD')
+      end
     end
 
-    let(:arg) { '3' }
+    context 'localized for France' do
+      subject { france_formatter }
 
-    specify 'returns empty string if value is null' do
-      expect(subject.currency_formatter(nil, '')).to eq('')
-    end
+      specify 'returns empty string if value is null' do
+        expect(subject.currency_formatter(nil, arg)).to eq('')
+      end
 
-    specify 'returns empty string if value is empty string' do
-      expect(subject.currency_formatter('', '')).to eq('')
-    end
+      specify 'returns empty string if value is empty string' do
+        expect(subject.currency_formatter('', arg)).to eq('')
+      end
 
-    specify 'returns formatted number' do
-      expect(subject.number_formatter('12345.67899', arg)).to eq('12,345.679')
+      specify 'returns formatted currency' do
+        expect(subject.currency_formatter('12345.67', arg)).to eq('12 345,67 €')
+      end
     end
   end
 

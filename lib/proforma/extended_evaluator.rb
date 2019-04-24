@@ -8,6 +8,7 @@
 #
 
 require 'bigdecimal'
+require 'forwardable'
 require 'stringento'
 
 require_relative 'extended_evaluator/formatter'
